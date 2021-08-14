@@ -162,35 +162,44 @@ class Aluno{
 - O exemplo abaixo ilustra um trecho de código que utiliza essas ideias.
 ```c
 // aluno.h
-typedef struct{
+typedef struct aluno_t
+{
   char nome[100];
   char endereco[100];
 
-  void (*setNome)(char* nome);
-  char* (*getNome)();
-}aluno_t;
+  void (*setNome)(struct aluno_t *a, char *nome);
+  char *(*getNome)(struct aluno_t *a);
+} aluno_t;
+
+aluno_t *new_aluno();
+void aluno_setNome(aluno_t *a, char *nome);
+char *aluno_getNome(aluno_t *a);
 ```
 - Definimos uma `struct` com dois campos, `nome` e `endereco`, para dados do aluno e mais dois campos que são ponteiros para função.
   - Um ponteiro para função é definido de maneira muito semelhante à definição de uma função comum, exceto pelo fato de que o nome da função (ponteiro) é precedida por um asterísco `*`, para indicar que a função é, ela própria, um ponteiro, e englobado por parênteses (incluindo o asterísco).
 ```c
+// aluno.c
 #include "aluno.h"
 #include <string.h>
 #include <stdlib.h>
 
 // Inicializar as funções (métodos) do aluno. Poderíamos inicializar
 // os dados do aluno também.
-aluno_t* new_aluno(){
+aluno_t *new_aluno()
+{
   aluno_t *tmp = malloc(sizeof(aluno_t));
   tmp->setNome = aluno_setNome;
   tmp->getNome = aluno_getNome;
   return tmp;
 }
 
-void aluno_setNome(aluno_t* a, char* nome){
+void aluno_setNome(aluno_t *a, char *nome)
+{
   strncpy(a->nome, nome, 100);
 }
 
-char* aluno_getNome(aluno_t *a){
+char *aluno_getNome(aluno_t *a)
+{
   return a->nome;
 }
 ```
@@ -201,13 +210,14 @@ char* aluno_getNome(aluno_t *a){
   - Retornando o endereço (referência) da variável recém-alocada.
 ```c
 //main.c
-#include "aluno.h"
 #include <stdio.h>
+#include "aluno.h"
 
-int main(void){
+int main(void)
+{
   aluno_t *aluno = new_aluno();
   aluno->setNome(aluno, "Fulano de Tal");
-  printf("Nome: %s\n", aluno->getNome(aluno) );
+  printf("Nome: %s\n", aluno->getNome(aluno));
 }
 ```
 - Observe ainda que a chamada dos "métodos" (funções) em `C` ocorrem com uso do operador seta (`->`), uma vez que nossa variável `aluno` é do tipo ponteiro. Além disso, passamos a referência (endereço) apontada pela variável `aluno` para ambos os métodos `setNome` e `getNome`.
